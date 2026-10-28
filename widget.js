@@ -3,7 +3,53 @@ const el = id => document.getElementById(id)
 const stage = el('stage')
 const chan = el('chan')
 const bubble = el('bubble')
+const pop = el('pop')
+const spring = el('spring')
 
+// ---- Showing and hiding the bubble (pops in / out in steps, see widget.css) ----
+const shown = { off: false, hand: false, drag: false } // 设置 off, double-click, while dragged
+function refreshPop() {
+  pop.classList.toggle('open', !shown.off && !shown.hand && !shown.drag)
+}
+requestAnimationFrame(refreshPop) // let the closed state paint first, so the first pop-in animates
+
+// ---- Jelly: the bubble lags behind her moves on a spring, and stretches with speed ----
+const jelly = { x: 0, y: 0, vx: 0, vy: 0, running: false }
+const STIFF = 0.1 // pull back toward her each frame
+const DAMP = 0.86 // how much speed survives each frame (lower settles sooner)
+const MAX_LAG = 70 // px
+
+// She moved by (dx, dy) screen px; the bubble stays put for a moment and then catches up.
+function kick(dx, dy) {
+  const zoom = Number(document.body.style.zoom) || 1
+  jelly.x = Math.max(-MAX_LAG, Math.min(MAX_LAG, jelly.x - dx / zoom))
+  jelly.y = Math.max(-MAX_LAG, Math.min(MAX_LAG, jelly.y - dy / zoom))
+  if (!jelly.running) {
+    jelly.running = true
+    requestAnimationFrame(wobble)
+  }
+}
+
+function wobble() {
+  jelly.vx = (jelly.vx - jelly.x * STIFF) * DAMP
+  jelly.vy = (jelly.vy - jelly.y * STIFF) * DAMP
+  jelly.x += jelly.vx
+  jelly.y += jelly.vy
+  // Fast sideways: wider and flatter; fast up or down: taller and thinner. A slight tilt into the lag.
+  const sx = 1 + Math.min(0.14, Math.abs(jelly.vx) * 0.012) - Math.min(0.08, Math.abs(jelly.vy) * 0.007)
+  const sy = 1 + Math.min(0.12, Math.abs(jelly.vy) * 0.01) - Math.min(0.08, Math.abs(jelly.vx) * 0.007)
+  const tilt = Math.max(-6, Math.min(6, jelly.vx * 0.35))
+  spring.style.transform =
+    `translate(${jelly.x.toFixed(2)}px, ${jelly.y.toFixed(2)}px) rotate(${tilt.toFixed(2)}deg) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})`
+  const still = Math.abs(jelly.x) + Math.abs(jelly.y) + Math.abs(jelly.vx) + Math.abs(jelly.vy) < 0.05
+  if (still) {
+    jelly.x = jelly.y = jelly.vx = jelly.vy = 0
+    spring.style.transform = ''
+    jelly.running = false
+  } else {
+    requestAnimationFrame(wobble)
+  }
+}
 let usage = null
 let shownFive = 0
 
@@ -20,7 +66,8 @@ window.chanApi.onSettings(next => {
   settings = next
   document.documentElement.style.setProperty('--edge', settings.bubble.accent)
   document.body.style.zoom = String(settings.character.scale)
-  bubble.classList.toggle('hidden', !settings.bubble.on)
+  shown.off = !settings.bubble.on
+  refreshPop()
   draw()
 })
 
@@ -277,7 +324,8 @@ chan.addEventListener('pointermove', e => {
   if (moved > 4) {
     chan.classList.remove('press')
     clearTimeout(settle)
-    if (!settings || settings.bubble.hideWhileDragging) stage.classList.add('dragging')
+    if (!settings || settings.bubble.hideWhileDragging) { shown.drag = true; refreshPop() }
+    kick(dx, dy)
     window.chanApi.drag(dx, dy)
   }
   down = { x: e.screenX, y: e.screenY }
@@ -290,7 +338,7 @@ chan.addEventListener('pointerup', () => {
   if (moved > 4) {
     window.chanApi.drop()
     // Let her land before the bubble comes back.
-    settle = setTimeout(() => stage.classList.remove('dragging'), 450)
+    settle = setTimeout(() => { shown.drag = false; refreshPop() }, 450)
     return
   }
   // A poke on her: squash-and-bounce and a sound; the bubble keeps showing usage.
@@ -352,7 +400,7 @@ let solid = false
 window.addEventListener('mousemove', e => {
   if (down) return
   const target = document.elementFromPoint(e.clientX, e.clientY)
-  const hit = !!target && (target === chan || bubble.contains(target)) && !isClear(e)
+  const hit = !!target && (target === chan || (pop.classList.contains('open') && bubble.contains(target))) && !isClear(e)
   if (hit !== solid) {
     solid = hit
     window.chanApi.solid(hit)
@@ -386,7 +434,7 @@ document.addEventListener('mouseleave', () => {
 })
 
 // Double-click hides or shows the bubble; right-click opens the menu.
-chan.addEventListener('dblclick', () => bubble.classList.toggle('hidden'))
+chan.addEventListener('dblclick', () => { shown.hand = !shown.hand; refreshPop() })
 window.addEventListener('contextmenu', e => {
   e.preventDefault()
   window.chanApi.menu()

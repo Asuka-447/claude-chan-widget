@@ -279,6 +279,26 @@ function createWindow() {
 
   startFollowing()
   if (process.env.CHAN_OPEN_SETTINGS) openSettings()
+  if (process.env.CHAN_SHOT_ANIM) {
+    // Development aid: film the pop-in and a jelly wobble, one PNG per frame.
+    win.webContents.on('did-finish-load', () => setTimeout(async () => {
+      const base = process.env.CHAN_SHOT_ANIM
+      const wc = win.webContents
+      const film = async (name, count, gap) => {
+        for (let i = 0; i < count; i++) {
+          fs.writeFileSync(`${base}-${name}-${String(i).padStart(2, '0')}.png`, (await wc.capturePage()).toPNG())
+          await new Promise(r => setTimeout(r, gap))
+        }
+      }
+      await wc.executeJavaScript('shown.hand = true; refreshPop()')
+      await new Promise(r => setTimeout(r, 600))
+      await wc.executeJavaScript('shown.hand = false; refreshPop()')
+      await film('pop', 8, 70)
+      await new Promise(r => setTimeout(r, 400))
+      await wc.executeJavaScript('kick(90, 0)')
+      await film('jelly', 10, 60)
+    }, 2500))
+  }
   if (process.env.CHAN_SHOT_STATUS) {
     // Development aid: pretend Claude is writing a file, then finishes; save both.
     win.webContents.on('did-finish-load', () => setTimeout(async () => {

@@ -8,6 +8,9 @@
 </head>
 <body>
   <div class="stage" id="stage">
+    <!-- pop: where the bubble sits; spring: the jelly lag; bubble + two puffs pop in one by one. -->
+    <div class="pop" id="pop">
+    <div class="spring" id="spring">
     <div class="bubble" id="bubble">
       <div class="status" id="status"></div>
       <div class="title">Claude 额度</div>
@@ -19,8 +22,10 @@
       <div class="week" id="week"></div>
       <div class="line" id="line"></div>
       <img class="meme" id="meme" alt="">
-
-      <div class="tail"><i></i><i></i></div>
+    </div>
+    <i class="puff p1"></i>
+    <i class="puff p2"></i>
+    </div>
     </div>
     <div class="pose" id="pose">
       <img class="chan" id="chan" src="assets/claude-chan.png" alt="Claude-chan" draggable="false">
