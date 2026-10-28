@@ -257,10 +257,10 @@ function build() {
 
   // 6. Character
   const chan = foldEntry('角色', {
-    summary: () => `大小 ${pct(buf.character.scale)}${buf.character.openAtLogin ? ' · 开机自启' : ''}`
+    summary: () => `大小 ${pct(buf.character.scale)}${buf.character.withClaude ? ' · 跟着 Claude 出现' : ''}`
   })
   slider(chan, '大小', 'character.scale', 0.7, 1.3, 0.05, pct)
-  checkbox(chan, '开机自动启动', 'character.openAtLogin')
+  checkbox(chan, '打开 Claude 时自动出现，关掉 Claude 时一起退出', 'character.withClaude')
 
   // Buttons: restore defaults on the left, cancel / save on the right.
   const buttons = document.createElement('div')

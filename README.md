@@ -15,7 +15,8 @@
 - **戳她**：压扁再弹起，叽叽叽或 duang duang。
 - **点气泡**：出一张 Claude 娘表情包，再点一下或等几秒变回额度。
 - **透明区域可以点穿**，不挡 Claude 的按钮。
-- **设置面板**（右键 → 设置…）：声音、台词、表情包、工作状态台词、气泡内容和颜色、大小、开机自启。
+- **设置面板**（右键 → 设置…）：声音、台词、表情包、工作状态台词、气泡内容和颜色、大小、要不要跟着 Claude 自动出现。
+- **跟着 Claude 来去**：第一次手动启动后，以后打开 Claude 会话时插件会自动把她叫起来；Claude 关掉 15 秒后她也退出。
 
 ## 安装
 
@@ -67,11 +68,11 @@ npm install-scripts approve electron koffi
 npm start
 ```
 
-想开机自动启动：右键她 → 设置… → 角色 → 开机自动启动。
+**只需要手动启动这一次。** 她会记下自己装在哪（`~/.claude/claude-chan/app.json`），以后你在 Claude 里打开会话时，插件会自动把她叫起来；Claude 关掉 15 秒后她也会退出。不想这样：右键她 → 设置… → 角色，取消「打开 Claude 时自动出现」。
 
 ## 工作原理
 
-- `plugin/`：Claude 插件。每次 Claude 回复时把额度写进 `~/.claude/claude-chan/usage.json`；每次发消息、调用工具、回复结束时把当前状态写进 `status.json`。只写这两个文件，不联网，不需要任何登录信息。
+- `plugin/`：Claude 插件。每次 Claude 回复时把额度写进 `~/.claude/claude-chan/usage.json`；每次发消息、调用工具、回复结束时把当前状态写进 `status.json`；会话开始时按 `app.json` 启动 Claude 娘。不联网，不需要任何登录信息。
 - `main.js`：Electron 主程序。读这两个文件，把 Claude 娘的窗口挂在 Claude 窗口上（用 [koffi](https://koffi.dev/) 调 Windows 接口），透明区域点穿。
 - `tools/follow.ps1`：每 0.25 秒找一次 Claude 窗口的位置。
 - `widget.js` / `widget.css`：Claude 娘和气泡。

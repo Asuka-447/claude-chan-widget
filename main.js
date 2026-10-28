@@ -83,10 +83,37 @@ function applySettings() {
     win.setMaximumSize(WIDTH, HEIGHT)
     place(right - WIDTH, bottom - HEIGHT)
   }
-  if (app.getLoginItemSettings().openAtLogin !== settings.character.openAtLogin) {
-    app.setLoginItemSettings({ openAtLogin: settings.character.openAtLogin })
-  }
+  registerLaunch()
   win.webContents.send('settings', settings)
+}
+
+// ---- Coming and going with Claude ----
+// app.json tells the usage-bubble plugin how to start her: it starts her when a
+// Claude session begins. Turning 跟着 Claude 出现 off removes the file.
+const APP_FILE = path.join(os.homedir(), '.claude', 'claude-chan', 'app.json')
+
+function registerLaunch() {
+  try {
+    if (settings.character.withClaude) {
+      // Packaged apps start with the exe alone; from source, electron.exe needs the folder.
+      const args = app.isPackaged ? [] : [__dirname]
+      fs.mkdirSync(path.dirname(APP_FILE), { recursive: true })
+      fs.writeFileSync(APP_FILE, JSON.stringify({ exe: process.execPath, args }, null, 2))
+    } else if (fs.existsSync(APP_FILE)) {
+      fs.unlinkSync(APP_FILE)
+    }
+    // Older versions offered start-at-login; she now comes with Claude instead.
+    if (app.getLoginItemSettings().openAtLogin) app.setLoginItemSettings({ openAtLogin: false })
+  } catch (err) {
+    console.error('register launch:', err.message)
+  }
+}
+
+// When Claude's window has been gone a while (Claude quit), she leaves too.
+let leaveTimer = 0
+function claudeGone(gone) {
+  clearTimeout(leaveTimer)
+  if (gone) leaveTimer = setTimeout(() => app.quit(), 15000)
 }
 
 function openSettings() {
@@ -167,6 +194,7 @@ function ownBy(claudeHwnd) {
 // Claude's window moved, resized, minimised or closed.
 function onClaude(info) {
   if (process.env.CHAN_DEBUG) console.error('claude window:', JSON.stringify(info))
+  claudeGone(!info.found)
   if (!info.found || info.minimized) {
     win.hide()
     return
@@ -305,6 +333,14 @@ ipcMain.on('menu', () => {
   ]).popup({ window: win })
 })
 
-app.whenReady().then(createWindow)
+// Only one of her: the plugin starts her on every new Claude session.
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+} else {
+  app.whenReady().then(() => {
+    createWindow()
+    registerLaunch()
+  })
+}
 app.on('window-all-closed', () => app.quit())
 app.on('before-quit', () => follower && follower.kill())

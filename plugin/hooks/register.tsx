@@ -43,6 +43,29 @@ function report($: EngineInterface, activity: Activity, detail = '') {
     .catch(() => undefined)
 }
 
+// ---- Bringing Claude-chan along ----
+// The widget writes app.json ({ exe, args }) the first time it runs, while
+// 跟着 Claude 出现 is on. Starting her again is harmless: she keeps one copy.
+async function wakeChan($: EngineInterface) {
+  try {
+    const app = JSON.parse(await $.fs.read(`${await chanFolder($)}/app.json`)) as { exe?: unknown; args?: unknown }
+    if (typeof app.exe !== 'string') return
+    const args = Array.isArray(app.args) ? app.args.filter((a): a is string => typeof a === 'string') : []
+    // Start-Process detaches her without handing her this call's output pipes, so
+    // she outlives this session and the call returns at once. The path and the
+    // arguments travel in environment variables, so no quoting can go wrong.
+    await $.process.run([
+      'powershell.exe', '-NoProfile', '-NonInteractive', '-Command',
+      'if ($env:CHAN_ARGS) { Start-Process -FilePath $env:CHAN_EXE -ArgumentList $env:CHAN_ARGS } else { Start-Process -FilePath $env:CHAN_EXE }'
+    ], {
+      timeoutMs: 15000,
+      env: { CHAN_EXE: app.exe, CHAN_ARGS: args.map(a => `"${a}"`).join(' ') }
+    })
+  } catch {
+    // No app.json yet (never run, or turned off), or not on Windows: nothing to do.
+  }
+}
+
 export const register: Register = on => {
   on('prompt.submit', ($, e, next) => {
     report($, 'thinking')
@@ -68,6 +91,7 @@ export const register: Register = on => {
 
   on('session.start', async ($, e, next) => {
     const result = await next(e)
+    void wakeChan($)
     const usage = await $.session.usage()
     await share($, usage.rateLimits.map(l => ({ ...l })))
     return result
