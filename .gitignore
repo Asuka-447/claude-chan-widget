@@ -1,0 +1,6 @@
+node_modules/
+*.log
+.claude-plugin/types/
+plugin/.claude-plugin/types/
+# Your own picture of her, if you swap one in (see README)
+assets/reference.*

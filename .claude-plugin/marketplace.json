@@ -1,0 +1,11 @@
+{
+  "name": "claude-chan-widget",
+  "owner": { "name": "Asuka-447" },
+  "plugins": [
+    {
+      "name": "usage-bubble",
+      "source": "./plugin",
+      "description": "Shows Claude's 5-hour and weekly usage above the prompt, and shares usage and work status with the Claude-chan desktop pet"
+    }
+  ]
+}

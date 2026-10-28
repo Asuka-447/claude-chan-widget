@@ -1,0 +1,180 @@
+:root {
+  --ink: #5a3a22;
+  --muted: #a88a72;
+  --edge: #c96a3a;
+  --ok: #e07a3f;
+  --warn: #d99a1e;
+  --hot: #c8363f;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  font-family: "Microsoft YaHei UI", "PingFang SC", sans-serif;
+}
+
+.stage {
+  position: relative;
+  height: 100%;
+}
+
+/* ---- Speech bubble, a cloud like the whale's but in Claude's warm tones ---- */
+.bubble {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  /* Anchored above her head so a taller bubble grows upward, never into her. */
+  bottom: 252px;
+  padding: 10px 22px 14px;
+  background: #fffaf4;
+  border: 4px solid var(--edge);
+  border-radius: 40% / 30%;
+  text-align: center;
+  color: var(--ink);
+  box-shadow: 0 4px 0 rgba(201, 106, 58, 0.25);
+  transition: opacity 0.25s, transform 0.25s;
+  cursor: pointer;
+}
+.title { font-weight: 800; font-size: 17px; color: var(--edge); letter-spacing: 1px; }
+.big { font-weight: 900; font-size: 36px; line-height: 1; font-variant-numeric: tabular-nums; }
+.big small { font-size: 20px; margin-left: 2px; }
+.sub { font-size: 12px; color: var(--muted); }
+.reset {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: var(--edge);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.reset:empty, .week:empty, .line:empty, .status:empty { display: none; }
+
+/* What Claude is doing: a small pill at the top of the bubble. */
+.status {
+  display: inline-block;
+  margin-bottom: 4px;
+  padding: 1px 9px;
+  border-radius: 999px;
+  background: rgba(201, 106, 58, 0.1);
+  color: var(--edge);
+  font-size: 12px;
+  font-weight: 700;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.status::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: var(--edge);
+  vertical-align: 1px;
+  animation: blink 1s ease-in-out infinite;
+}
+.stage.act-done .status::before, .stage.act-stopped .status::before { animation: none; }
+.stage.act-error .status { color: var(--hot); background: rgba(200, 54, 63, 0.1); }
+.stage.act-error .status::before { background: var(--hot); }
+
+/* Small poses, on a wrapper so they never fight the press / bounce / flip transforms. */
+.pose { position: absolute; right: 4px; bottom: 0; width: 200px; transform-origin: 50% 100%; }
+.pose .chan { position: static; display: block; }
+.stage.act-thinking .pose { animation: sway 2.4s ease-in-out infinite; }
+.stage.act-reading .pose { animation: nod 1.6s ease-in-out infinite; }
+.stage.act-writing .pose, .stage.act-running .pose { animation: busy 0.5s ease-in-out infinite; }
+.stage.act-searching .pose { animation: look 1.8s ease-in-out infinite; }
+.stage.act-asking .pose { animation: hop 1.2s ease-in-out infinite; }
+.stage.act-error .pose { animation: shake 0.45s ease-in-out 2; }
+.stage.act-done .pose { animation: cheer 0.7s ease-out 2; }
+
+/* Sparkles when a reply finishes. */
+.spark {
+  position: absolute;
+  font-size: 18px;
+  pointer-events: none;
+  animation: spark 1.1s ease-out forwards;
+}
+
+@keyframes blink { 50% { opacity: 0.3; } }
+@keyframes sway { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
+@keyframes nod { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px) rotate(0.8deg); } }
+@keyframes busy { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes look { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(-4px); } 70% { transform: translateX(4px); } }
+@keyframes hop { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-10px); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+@keyframes cheer { 0% { transform: scale(1); } 40% { transform: scale(1.04, 0.96) translateY(-12px); } 100% { transform: scale(1); } }
+@keyframes spark {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.5); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), -70px) scale(1.1); }
+}
+.week { margin-top: 4px; font-size: 13px; color: var(--muted); }
+.line { margin-top: 4px; font-size: 13px; color: var(--ink); }
+.meme { display: block; width: 130px; height: 130px; margin: 0 auto; border-radius: 10px; }
+.meme:not([src]) { display: none; }
+
+/* While a meme is up, the bubble shows only the meme. */
+.bubble.meme-mode { padding: 10px 14px 12px; border-radius: 28px; left: 60px; right: 60px; }
+.bubble.meme-mode > :not(.meme):not(.tail) { display: none; }
+
+.tail i {
+  position: absolute;
+  background: #fffaf4;
+  border: 3px solid var(--edge);
+  border-radius: 50%;
+}
+/* The two little puffs hang off the bottom of the bubble, toward her head. */
+.tail i:nth-child(1) { width: 22px; height: 14px; left: 58%; bottom: -26px; }
+.tail i:nth-child(2) { width: 12px; height: 8px; left: 66%; bottom: -44px; }
+
+.bubble.hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
+
+/* While she is being dragged the bubble tucks away; it comes back once she settles. */
+.stage.dragging .bubble {
+  opacity: 0;
+  transform: translateY(14px) scale(0.92);
+  pointer-events: none;
+  transition: opacity 0.12s, transform 0.12s;
+}
+
+/* ---- Claude-chan ---- */
+.chan {
+  width: 200px;
+  cursor: grab;
+  transform-origin: 50% 100%;
+  transition: transform 0.12s ease-out;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
+}
+.chan.flip { transform: scaleX(-1); }
+.chan.press { transform: scale(1.06, 0.88); }
+.chan.flip.press { transform: scale(-1.06, 0.88); }
+.chan.bounce { animation: bounce 0.42s ease-out; }
+.chan.flip.bounce { animation: bounce-flip 0.42s ease-out; }
+.chan:active { cursor: grabbing; }
+
+/* Bubble colours follow how much is used. */
+.warn .big { color: var(--warn); }
+.hot .big { color: var(--hot); }
+.hot .bubble { border-color: var(--hot); }
+
+@keyframes bounce {
+  0% { transform: scale(1.06, 0.88); }
+  45% { transform: scale(0.95, 1.08) translateY(-10px); }
+  75% { transform: scale(1.02, 0.98); }
+  100% { transform: none; }
+}
+@keyframes bounce-flip {
+  0% { transform: scale(-1.06, 0.88); }
+  45% { transform: scale(-0.95, 1.08) translateY(-10px); }
+  75% { transform: scale(-1.02, 0.98); }
+  100% { transform: scaleX(-1); }
+}

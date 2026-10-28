@@ -1,0 +1,120 @@
+/* Card, rows and buttons follow the whale widget's settings panel
+   (MeteorNOX/DeepSeek-Balance-Whale-Widget, MIT), recoloured in Claude's warm tones. */
+:root {
+  --ink: #5a3a22;
+  --accent: #c96a3a;
+  --soft: rgba(201, 106, 58, 0.06);
+  --soft-hover: rgba(201, 106, 58, 0.12);
+  --line: rgba(201, 106, 58, 0.18);
+}
+
+html, body {
+  margin: 0;
+  background: #fffaf4;
+  color: var(--ink);
+  font: 13px "Microsoft YaHei UI", "PingFang SC", sans-serif;
+  color-scheme: light;
+}
+
+.card {
+  padding: 14px 16px 12px;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+/* An entry row: [✓] name ........ summary ▸ */
+.entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 2px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  background: var(--soft);
+  cursor: pointer;
+}
+.entry:hover { background: var(--soft-hover); }
+.entry .name { font-weight: 600; }
+.entry .gap { flex: 1; }
+.entry .summary {
+  font-size: 11px;
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 52%;
+}
+.entry .arrow { opacity: 0.6; }
+
+/* The fold body under an entry, animated with max-height. */
+.fold {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.24s ease, opacity 0.18s ease;
+  flex-shrink: 0;
+  padding-left: 10px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+.row label.key { width: 92px; flex-shrink: 0; }
+.row input[type="range"] { flex: 1; accent-color: var(--accent); }
+.row .value { width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+.row select, .row input[type="number"] {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+.row input[type="color"] { width: 40px; height: 26px; border: none; background: none; padding: 0; }
+input[type="checkbox"] { accent-color: var(--accent); }
+
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 92px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  resize: vertical;
+}
+textarea.small { min-height: 54px; }
+.hint { font-size: 11px; opacity: 0.6; margin: 2px 0 6px; }
+
+.btn {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font: inherit;
+  cursor: pointer;
+}
+.btn-ok { background: var(--accent); color: #fff; }
+.btn-ok:hover { filter: brightness(1.08); }
+.btn-no { background: var(--soft-hover); color: var(--accent); }
+.btn-no:hover { background: rgba(201, 106, 58, 0.2); }
+.btn-small { padding: 3px 10px; font-size: 12px; }
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
+}
+.buttons .spacer { flex: 1; }

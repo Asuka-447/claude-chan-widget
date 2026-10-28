@@ -1,0 +1,21 @@
+{
+  "name": "claude-chan-widget",
+  "version": "0.1.0",
+  "description": "A floating Claude-chan that shows your Claude usage and reset countdown",
+  "main": "main.js",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "33.2.1"
+  },
+  "allowScripts": {
+    "electron@33.2.1": true,
+    "koffi@2.9.2": true
+  },
+  "dependencies": {
+    "koffi": "^2.9.2"
+  }
+}

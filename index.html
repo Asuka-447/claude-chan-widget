@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'">
+  <title>Claude-chan</title>
+  <link rel="stylesheet" href="widget.css">
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="bubble" id="bubble">
+      <div class="status" id="status"></div>
+      <div class="title">Claude 额度</div>
+      <div id="five-box">
+        <div class="big"><span id="five">--</span><small>%</small></div>
+        <div class="sub">5 小时窗口已用</div>
+      </div>
+      <div class="reset" id="reset"></div>
+      <div class="week" id="week"></div>
+      <div class="line" id="line"></div>
+      <img class="meme" id="meme" alt="">
+
+      <div class="tail"><i></i><i></i></div>
+    </div>
+    <div class="pose" id="pose">
+      <img class="chan" id="chan" src="assets/claude-chan.png" alt="Claude-chan" draggable="false">
+    </div>
+  </div>
+  <script src="widget.js"></script>
+</body>
+</html>
