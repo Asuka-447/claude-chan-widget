@@ -279,6 +279,14 @@ function createWindow() {
 
   startFollowing()
   if (process.env.CHAN_OPEN_SETTINGS) openSettings()
+  if (process.env.CHAN_FILM) {
+    // Development aid: film the intro video's scenes (see tools/film.js).
+    openSettings()
+    win.webContents.on('did-finish-load', () => setTimeout(() => {
+      require('./tools/film')(win, settingsWin, process.env.CHAN_FILM)
+        .catch(err => console.error('film:', err.message))
+    }, 3000))
+  }
   if (process.env.CHAN_PROBE) {
     // Development aid: report whether the bubble is up, a few times after start.
     win.webContents.on('did-finish-load', () => {

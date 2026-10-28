@@ -6,6 +6,10 @@
 
 粉丝自制，与 Anthropic 无关。目前只支持 **Windows**。
 
+![她动起来的样子](docs/intro.gif)
+
+完整介绍视频（25 秒）：[docs/intro.mp4](docs/intro.mp4)
+
 ## 她会做什么
 
 - **额度气泡**：5 小时窗口已用百分比（数字滚动）、重置倒计时、本周已用；过半变黄，超过 80% 变红。平时收起，戳她、鼠标停在她身上、额度变了、Claude 等你确认 / 出错 / 做完时冒出来，3 秒后收起（秒数可调）。
@@ -77,6 +81,20 @@ npm start
 - `tools/follow.ps1`：每 0.25 秒找一次 Claude 窗口的位置。
 - `widget.js` / `widget.css`：Claude 娘和气泡。
 - `settings-page.js`：设置面板。设置存在 `~/.claude/claude-chan/settings.json`。
+
+## 重新录介绍视频
+
+```bash
+set CHAN_FILM=%TEMP%\chan-film && npm start
+```
+
+等她自己演完（约 20 秒，会在那个文件夹里留下 `done.txt`），再运行：
+
+```bash
+python tools/make-video.py %TEMP%\chan-film
+```
+
+生成 `docs/intro.mp4` 和 `docs/intro.gif`（需要 `pip install pillow imageio-ffmpeg`）。
 
 ## 换成你自己的立绘
 
