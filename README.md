@@ -35,7 +35,7 @@
 claude plugin install usage-bubble --marketplace Asuka-447/claude-chan-widget
 ```
 
-装好以后，输入框上方会出现一条「🐋 Claude 额度」，发一条消息后就有数字了。
+插件本身不显示任何东西，只负责把额度和工作状态交给 Claude 娘。装好以后在 Claude 里发一条消息，她的气泡里就有数字了。
 
 ### 2. 运行桌宠
 

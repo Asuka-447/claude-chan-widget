@@ -1,7 +1,2 @@
+// One rate-limit window as written to usage.json for the Claude-chan widget.
 export type Limit = { kind: string; percentUsed: number; resetsAt?: string }
-
-declare module 'claude-code' {
-  interface PluginState {
-    'usage-bubble': { limits: Limit[]; now: number }
-  }
-}

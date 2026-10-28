@@ -1,6 +1,6 @@
 {
   "name": "usage-bubble",
-  "version": "0.1.0",
-  "description": "A cute band above the prompt showing Claude's subscription usage and reset countdown",
+  "version": "0.2.0",
+  "description": "Shares Claude's 5-hour and weekly usage and what Claude is doing with the Claude-chan desktop pet",
   "types": "./types/index.d.ts"
 }
