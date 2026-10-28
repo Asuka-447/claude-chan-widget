@@ -279,6 +279,18 @@ function createWindow() {
 
   startFollowing()
   if (process.env.CHAN_OPEN_SETTINGS) openSettings()
+  if (process.env.CHAN_PROBE) {
+    // Development aid: report whether the bubble is up, a few times after start.
+    win.webContents.on('did-finish-load', () => {
+      for (const s of [1, 6, 9]) {
+        setTimeout(async () => {
+          const open = await win.webContents.executeJavaScript("pop.classList.contains('open')")
+          console.error(`probe ${s}s open=${open}`)
+          if (s === 6) await win.webContents.executeJavaScript('peek()')
+        }, s * 1000)
+      }
+    })
+  }
   if (process.env.CHAN_SHOT_ANIM) {
     // Development aid: film the pop-in and a jelly wobble, one PNG per frame.
     win.webContents.on('did-finish-load', () => setTimeout(async () => {

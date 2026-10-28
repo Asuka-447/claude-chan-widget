@@ -7,9 +7,28 @@ const pop = el('pop')
 const spring = el('spring')
 
 // ---- Showing and hiding the bubble (pops in / out in steps, see widget.css) ----
-const shown = { off: false, hand: false, drag: false } // 设置 off, double-click, while dragged
+// Hidden by: 设置 off, a double-click, being dragged, or having been up long enough.
+const shown = { off: false, hand: false, drag: false, idle: false }
 function refreshPop() {
-  pop.classList.toggle('open', !shown.off && !shown.hand && !shown.drag)
+  pop.classList.toggle('open', !shown.off && !shown.hand && !shown.drag && !shown.idle)
+}
+
+// The bubble pops up when there is something to see, then tucks away after
+// 设置 → 气泡 → 显示几秒 (0 keeps it up). The mouse resting on her or the bubble holds it.
+let idleTimer = 0
+let hovering = false
+function holdSeconds() {
+  return settings ? settings.bubble.seconds : 3
+}
+function peek(ms = holdSeconds() * 1000) {
+  shown.idle = false
+  refreshPop()
+  scheduleTuck(ms)
+}
+function scheduleTuck(ms = holdSeconds() * 1000) {
+  clearTimeout(idleTimer)
+  if (hovering || holdSeconds() <= 0) return
+  idleTimer = setTimeout(() => { shown.idle = true; refreshPop() }, ms)
 }
 requestAnimationFrame(refreshPop) // let the closed state paint first, so the first pop-in animates
 
@@ -67,7 +86,9 @@ window.chanApi.onSettings(next => {
   document.documentElement.style.setProperty('--edge', settings.bubble.accent)
   document.body.style.zoom = String(settings.character.scale)
   shown.off = !settings.bubble.on
+  if (holdSeconds() <= 0) shown.idle = false
   refreshPop()
+  scheduleTuck()
   draw()
 })
 
@@ -125,10 +146,17 @@ function draw() {
     : ''
 }
 
+let lastPercents = ''
 window.chanApi.onUsage(data => {
   usage = data
   const five = find('five_hour')
   if (five) rollTo(five.percentUsed)
+  // Pop up when a number actually moves, not on every rewrite of the file.
+  const percents = (data && data.limits || []).map(l => l.kind + l.percentUsed).join()
+  if (percents !== lastPercents) {
+    lastPercents = percents
+    peek()
+  }
   if (!el('line').dataset.poked) el('line').textContent = ''
   draw()
 })
@@ -158,6 +186,10 @@ window.chanApi.onStatus(status => {
 
   setActivity(settings.status.poses ? status.activity : null)
   if (!same) {
+    // Only what needs you pops the bubble up; the rest just updates its line and her pose.
+    if (status.activity === 'asking' || ENDINGS.includes(status.activity)) {
+      peek(Math.max(holdSeconds(), 4) * 1000)
+    }
     const texts = settings.status.texts[status.activity] || []
     const text = texts.length ? pick(texts) : ''
     el('status').textContent = text.replace('{detail}', status.detail || '').trim()
@@ -347,6 +379,7 @@ chan.addEventListener('pointerup', () => {
   squeak(1450, 0.07) // release: a quick second 叽
   setTimeout(() => squeak(1300, 0.06), 85)
   duang(170)
+  peek()
 })
 
 const pick = list => list[Math.floor(Math.random() * list.length)]
@@ -391,6 +424,7 @@ function poke() {
   line.dataset.poked = '1'
   clearTimeout(poke.timer)
   poke.timer = setTimeout(backToUsage, settings.lines.seconds * 1000)
+  peek(settings.lines.seconds * 1000 + 600)
 }
 
 // ---- Click-through: only her body and the bubble catch the mouse ----
@@ -404,6 +438,13 @@ window.addEventListener('mousemove', e => {
   if (hit !== solid) {
     solid = hit
     window.chanApi.solid(hit)
+  }
+  // Resting on her brings the bubble up and holds it; leaving lets it tuck away.
+  const over = !!target && (target === chan || pop.contains(target))
+  if (over !== hovering) {
+    hovering = over
+    if (over && target === chan) peek()
+    else scheduleTuck()
   }
 })
 
@@ -428,6 +469,8 @@ function isClear(e) {
 
 // Leaving the window always lets the mouse through again.
 document.addEventListener('mouseleave', () => {
+  hovering = false
+  scheduleTuck()
   if (down || !solid) return
   solid = false
   window.chanApi.solid(false)

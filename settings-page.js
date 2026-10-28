@@ -244,6 +244,11 @@ function build() {
       return parts.join(' · ') || '只显示台词'
     }
   })
+  slider(bubble, '显示几秒', 'bubble.seconds', 0, 30, 1, v => v ? v + ' 秒' : '一直显示')
+  const when = document.createElement('div')
+  when.className = 'hint'
+  when.textContent = '平时收起；戳她、鼠标停在她身上、额度变了、Claude 有新动作时冒出来，过这么久再收起。拖到最左边就一直显示。'
+  bubble.appendChild(when)
   checkbox(bubble, '拖动时收起气泡', 'bubble.hideWhileDragging')
   checkbox(bubble, '显示 5 小时额度', 'bubble.showFive')
   checkbox(bubble, '显示重置倒计时', 'bubble.showReset')
