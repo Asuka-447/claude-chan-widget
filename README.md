@@ -1,5 +1,7 @@
 # Claude 娘 · 额度桌宠
 
+![Claude 额度小桌宠](docs/banner.png)
+
 住在 Claude Desktop 窗口里的 Q 版 Claude 娘：头顶气泡显示你的 **5 小时额度、重置倒计时和本周额度**，还会跟着 Claude 的工作状态说话、做小动作。
 
 粉丝自制，与 Anthropic 无关。目前只支持 **Windows**。
